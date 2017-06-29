@@ -19,3 +19,13 @@ you gonna need OpenCV to run this code.
 from object_detection import detect_single_image
 
 
+def camera_live_detect():
+    graph_path = 'out_of_box_graph/ssd_mobilenet_v1_coco_11_06_2017/frozen_inference_graph.pb'
+    label_file = 'data/mscoco_label_map.pbtxt'
+    num_classes = 90
+
+    detect_single_image(graph_path, label_file, num_classes)
+
+
+if __name__ == '__main__':
+    camera_live_detect()
