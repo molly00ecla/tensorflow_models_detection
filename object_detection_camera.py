@@ -16,9 +16,18 @@
 this file detect objects from live camera.
 you gonna need OpenCV to run this code.
 """
-from object_detection import detect_single_image
 import cv2
 from PIL import Image
+import os
+import tensorflow as tf
+import numpy as np
+from utils import label_map_util
+from utils import visualization_utils as vis_util
+
+
+def load_image_to_numpy_array_uint(img):
+    (im_width, im_height) = img.size
+    return np.array(img.getdata()).reshape(im_height, im_width, 3).astype(np.uint8)
 
 
 def camera_live_detect():
@@ -26,17 +35,53 @@ def camera_live_detect():
     label_file = 'data/mscoco_label_map.pbtxt'
     num_classes = 90
 
-    try:
-        cap = cv2.VideoCapture(0)
+    detection_graph = tf.Graph()
+    with detection_graph.as_default():
+        od_graph_def = tf.GraphDef()
+        with tf.gfile.GFile(graph_path, 'rb') as fid:
+            serialized_graph = fid.read()
+            od_graph_def.ParseFromString(serialized_graph)
+            tf.import_graph_def(od_graph_def, name='')
+    print('load graph success!')
+    label_map = label_map_util.load_labelmap(label_file)
+    categories = label_map_util.convert_label_map_to_categories(label_map,
+                                                                max_num_classes=num_classes,
+                                                                use_display_name=True)
+    category_index = label_map_util.create_category_index(categories=categories)
+    with detection_graph.as_default():
+        with tf.Session(graph=detection_graph) as sess:
+            try:
+                cap = cv2.VideoCapture(0)
+                while True:
+                    ret, frame = cap.read()
+                    image = cv2.cvtColor(frame, cv2.CAP_MODE_RGB)
+                    image_np = np.array(image)
+                    image_np_expanded = np.expand_dims(image_np, axis=0)
 
-        while True:
-            ret, frame = cap.read()
-            image = cv2.cvtColor(frame, cv2.CAP_MODE_RGB)
-            print(image)
+                    image_tensor = detection_graph.get_tensor_by_name('image_tensor:0')
+                    boxes = detection_graph.get_tensor_by_name('detection_boxes:0')
+                    scores = detection_graph.get_tensor_by_name('detection_scores:0')
+                    classes = detection_graph.get_tensor_by_name('detection_classes:0')
+                    num_detections = detection_graph.get_tensor_by_name('num_detections:0')
 
-            # detect_single_image(graph_path, label_file, num_classes)
-    except Exception as e:
-        print('no camera on this device: ', e)
+                    (boxes, scores, classes, num_detections) = sess.run(
+                        [boxes, scores, classes, num_detections],
+                        feed_dict={image_tensor: image_np_expanded}
+                    )
+                    vis_util.visualize_boxes_and_labels_on_image_array(
+                        image_np,
+                        np.squeeze(boxes),
+                        np.squeeze(classes).astype(np.int32),
+                        np.squeeze(scores),
+                        category_index=category_index,
+                        use_normalized_coordinates=True,
+                        line_thickness=8
+                    )
+                    cv2.imshow('video', image_np)
+                    if cv2.waitKey(1) & 0xFF == ord('q'):
+                        break
+            except Exception as e:
+                print('open camera fail: ', e)
 
 
 if __name__ == '__main__':
