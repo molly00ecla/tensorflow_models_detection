@@ -17,7 +17,7 @@
 # limitations under the License.
 # ------------------------------------------------------------------------
 """
-directly load image and detect it using outbox_models/frozen.pb
+directly load image and detect it using out_of_box_graphs/frozen.pb
 
 first get pre-trained model from google `https://github.com/tensorflow/models/blob/master/object_detection/g3doc/detection_model_zoo.md`
 you can find SSD Faster-RCNN and more models with various speed and accuracy.
@@ -30,7 +30,7 @@ from PIL import Image
 from utils import label_map_util
 from utils import visualization_utils as vis_util
 
-GRAPH_PATH = 'outofbox_graph/ssd_mobilenet_v1_coco_11_06_2017/frozen_inference_graph.pb'
+GRAPH_PATH = 'out_of_box_graph/ssd_mobilenet_v1_coco_11_06_2017/frozen_inference_graph.pb'
 LABEL_PATH = 'data/mscoco_label_map.pbtxt'
 NUM_CLASS = 90
 TEST_IMAGES = [os.path.join('test_images', 'image{}.jpg'.format(i)) for i in range(1, 3)]
@@ -38,11 +38,6 @@ IMAGE_SIZE = (12, 8)
 
 
 def load_image_to_numpy_array_uint(img):
-    (im_width, im_height) = img.size
-    return np.array(img.getdata()).reshape(im_height, im_width, 3).astype(np.uint8)
-
-
-def load_image_to_numpy_array_int(img):
     (im_width, im_height) = img.size
     return np.array(img.getdata()).reshape(im_height, im_width, 3).astype(np.uint8)
 
@@ -94,6 +89,57 @@ def detect():
                 plt.imshow(image_np)
                 plt.savefig('result_{}.jpg'.format(i))
                 plt.show()
+
+
+def detect_single_image(graph_path, label_path, num_classes):
+    """
+    process single image, and return original image with box on it as array
+    :param graph_path:
+    :param label_path:
+    :param num_classes:
+    :return:
+    """
+    detection_graph = tf.Graph()
+    with detection_graph.as_default():
+        od_graph_def = tf.GraphDef()
+        with tf.gfile.GFile(graph_path, 'rb') as fid:
+            serialized_graph = fid.read()
+            od_graph_def.ParseFromString(serialized_graph)
+            tf.import_graph_def(od_graph_def, name='')
+    print('load graph success!')
+    label_map = label_map_util.load_labelmap(label_path)
+    categories = label_map_util.convert_label_map_to_categories(label_map,
+                                                                max_num_classes=num_classes,
+                                                                use_display_name=True)
+    category_index = label_map_util.create_category_index(categories=categories)
+
+    with detection_graph.as_default():
+        with tf.Session(graph=detection_graph) as sess:
+            image = Image.open(image_path)
+            image_np = load_image_to_numpy_array_uint(image)
+
+            image_np_expanded = np.expand_dims(image_np, axis=0)
+
+            image_tensor = detection_graph.get_tensor_by_name('image_tensor:0')
+            boxes = detection_graph.get_tensor_by_name('detection_boxes:0')
+            scores = detection_graph.get_tensor_by_name('detection_scores:0')
+            classes = detection_graph.get_tensor_by_name('detection_classes:0')
+            num_detections = detection_graph.get_tensor_by_name('num_detections:0')
+
+            (boxes, scores, classes, num_detections) = sess.run(
+                [boxes, scores, classes, num_detections],
+                feed_dict={image_tensor: image_np_expanded}
+            )
+            vis_util.visualize_boxes_and_labels_on_image_array(
+                image_np,
+                np.squeeze(boxes),
+                np.squeeze(classes).astype(np.int32),
+                np.squeeze(scores),
+                category_index=category_index,
+                use_normalized_coordinates=True,
+                line_thickness=8
+            )
+            return image_np
 
 
 if __name__ == '__main__':
