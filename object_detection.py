@@ -91,14 +91,7 @@ def detect():
                 plt.show()
 
 
-def detect_single_image(graph_path, label_path, num_classes):
-    """
-    process single image, and return original image with box on it as array
-    :param graph_path:
-    :param label_path:
-    :param num_classes:
-    :return:
-    """
+def detect_single_image(graph_path, label_path, num_classes, image_array):
     detection_graph = tf.Graph()
     with detection_graph.as_default():
         od_graph_def = tf.GraphDef()
@@ -115,8 +108,7 @@ def detect_single_image(graph_path, label_path, num_classes):
 
     with detection_graph.as_default():
         with tf.Session(graph=detection_graph) as sess:
-            image = Image.open(image_path)
-            image_np = load_image_to_numpy_array_uint(image)
+            image_np = load_image_to_numpy_array_uint(image_array)
 
             image_np_expanded = np.expand_dims(image_np, axis=0)
 

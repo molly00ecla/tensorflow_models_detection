@@ -17,6 +17,8 @@ this file detect objects from live camera.
 you gonna need OpenCV to run this code.
 """
 from object_detection import detect_single_image
+import cv2
+from PIL import Image
 
 
 def camera_live_detect():
@@ -24,7 +26,17 @@ def camera_live_detect():
     label_file = 'data/mscoco_label_map.pbtxt'
     num_classes = 90
 
-    detect_single_image(graph_path, label_file, num_classes)
+    try:
+        cap = cv2.VideoCapture(0)
+
+        while True:
+            ret, frame = cap.read()
+            image = cv2.cvtColor(frame, cv2.CAP_MODE_RGB)
+            print(image)
+
+            # detect_single_image(graph_path, label_file, num_classes)
+    except Exception as e:
+        print('no camera on this device: ', e)
 
 
 if __name__ == '__main__':
