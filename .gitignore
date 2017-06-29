@@ -1,0 +1,8 @@
+outofbox_graph/ssd_mobilenet_v1_coco_11_06_2017/frozen_inference_graph.pb
+outofbox_graph/ssd_mobilenet_v1_coco_11_06_2017/model.ckpt.data-00000-of-00001
+outofbox_graph/ssd_mobilenet_v1_coco_11_06_2017/model.ckpt.index
+outofbox_graph/ssd_mobilenet_v1_coco_11_06_2017/model.ckpt.meta
+__pycache__/
+.idea/
+out_of_box_graph/
+data/pet/
