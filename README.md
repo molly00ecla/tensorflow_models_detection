@@ -24,6 +24,22 @@
 有时间我在把训练KITTI数据集的部分写完，其实这很简单，就是把图片转成tfrecord然后写proto修改参数。不过说实话，检测网络普遍比较复杂。
 
 
+## Generate Protos By Self
+
+To be honest, Google's protobuf is a great thing, but it's not something just like json or xml. In this project, a lot
+of protobuf messages has been used. Many data models were converted into protos, so how to generate them is very important.
+
+You gonna download protobuf git repo and build it from source, after that, you will probably got protoc the compiler.
+Just inside the ./tensorflow_models_detection
+```
+protoc -I ./ --python_out ./ ./protos/anchor_generator.proto
+
+# actually you can convert all protos into python file
+protoc -I ./ --python_out ./ ./protos/*.proto
+```
+the option `-I` is also called --proto_path, this indicates the proto save path as well as the proto search path (sometimes
+one proto may import from another proto, so how to find them you should specific this path, by usually place them into one
+directory like `protos` is more make sense.).
 
 ## Copyright
 

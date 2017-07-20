@@ -23,13 +23,13 @@ from abc import abstractmethod
 import re
 import tensorflow as tf
 
-from object_detection.core import box_coder as bcoder
-from object_detection.core import box_list
-from object_detection.core import box_predictor as bpredictor
-from object_detection.core import model
-from object_detection.core import standard_fields as fields
-from object_detection.core import target_assigner
-from object_detection.utils import variables_helper
+from core import box_coder as bcoder
+from core import box_list
+from core import box_predictor as bpredictor
+from core import model
+from core import standard_fields as fields
+from core import target_assigner
+from utils import variables_helper
 
 slim = tf.contrib.slim
 
@@ -130,8 +130,8 @@ class SSDMetaArch(model.DetectionModel):
           score_conversion_fn: callable elementwise nonlinearity (that takes tensors
             as inputs and returns tensors).  This is usually used to convert logits
             to probabilities.
-          classification_loss: an object_detection.core.losses.Loss object.
-          localization_loss: a object_detection.core.losses.Loss object.
+          classification_loss: an core.losses.Loss object.
+          localization_loss: a core.losses.Loss object.
           classification_loss_weight: float
           localization_loss_weight: float
           normalize_loss_by_num_matches: boolean
