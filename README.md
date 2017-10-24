@@ -5,9 +5,9 @@
 
 
 
-官方提供了SSD， Faster-RCNN的预训练模型，并且使用了不同的特征提取网络。从[这里](https://github.com/tensorflow/models/blob/master/object_detection/g3doc/detection_model_zoo.md)可以找到对应的下载链接。目前支持这些组合：
+官方提供了SSD， Faster-RCNN的预训练模型，并且使用了不同的特征提取网络。从[这里](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/detection_model_zoo.md)可以找到对应的下载链接。目前支持这些组合：
 
-* SSD_MobileNet
+* [SSD_MobileNet](http://download.tensorflow.org/models/object_detection/ssd_mobilenet_v1_coco_11_06_2017.tar.gz)
 * SSD_Inception_V2
 * RFCN_ResNet101
 * faster_rcnn_ResNet101
